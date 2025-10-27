@@ -30,10 +30,6 @@ public class Shipment {
     @JoinColumn(name = "client_id", nullable = false)
     private Client client;
 
-    @ManyToOne
-    @JoinColumn(name = "package_id", nullable = false)
-    private Package packageObj;
-
     @OneToOne
     @JoinColumn(name = "vehicle_id", nullable = false)
     private Vehicle vehicle;
@@ -43,6 +39,12 @@ public class Shipment {
 
     @Column(name = "destination_address", nullable = false)
     private String destinationAddress;
+
+    @Column(nullable = false)
+    private Double weight;
+
+    @Column(nullable = false)
+    private Double volume;
 
     @Enumerated(EnumType.STRING)
     private ShipmentPriority priority;
@@ -57,18 +59,20 @@ public class Shipment {
     @JsonCreator
     public Shipment(@JsonProperty("trackingCode") String trackingCode,
             @JsonProperty("client") Client client,
-            @JsonProperty("package") Package packageObj,
             @JsonProperty("vehicle") Vehicle vehicle,
             @JsonProperty("originAddress") String originAddress,
             @JsonProperty("destinationAddress") String destinationAddress,
+            @JsonProperty("weight") Double weight,
+            @JsonProperty("volume") Double volume,
             @JsonProperty("priority") ShipmentPriority priority,
             @JsonProperty("status") ShipmentStatus status) {
         this.trackingCode = trackingCode;
         this.client = client;
-        this.packageObj = packageObj;
         this.vehicle = vehicle;
         this.originAddress = originAddress;
         this.destinationAddress = destinationAddress;
+        this.weight = weight;
+        this.volume = volume;
         this.priority = priority;
         this.status = status;
     }
@@ -97,14 +101,6 @@ public class Shipment {
         this.client = client;
     }
 
-    public Package getPackage() {
-        return packageObj;
-    }
-
-    public void setPackage(Package packageObj) {
-        this.packageObj = packageObj;
-    }
-
     public Vehicle getVehicle() {
         return vehicle;
     }
@@ -127,6 +123,22 @@ public class Shipment {
 
     public void setDestinationAddress(String destinationAddress) {
         this.destinationAddress = destinationAddress;
+    }
+
+    public Double getWeight() {
+        return weight;
+    }
+
+    public void setWeight(Double weight) {
+        this.weight = weight;
+    }
+
+    public Double getVolume() {
+        return volume;
+    }
+
+    public void setVolume(Double volume) {
+        this.volume = volume;
     }
 
     public ShipmentPriority getPriority() {

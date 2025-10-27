@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Optional;
 import com.udea.CourierSync.exception.BadRequestException;
 import com.udea.CourierSync.exception.ResourceNotFoundException;
+import com.udea.CourierSync.enums.ShipmentStatus;
+import com.udea.CourierSync.entity.StatusHistory;
 
 @Service
 public class ShipmentService {
@@ -88,5 +90,37 @@ public class ShipmentService {
       throw new ResourceNotFoundException("Shipment not found with id: " + id);
     }
     shipmentRepository.deleteById(id);
+  }
+
+  public boolean isShipmentPending(Long id) {
+    return shipmentRepository.findById(id)
+        .map(shipment -> shipment.getStatus() == ShipmentStatus.PENDIENTE)
+        .orElse(false);
+  }
+
+  public boolean canDriverUpdateStatus(Long id, ShipmentDTO dto) {
+    return shipmentRepository.findById(id)
+        .map(shipment -> {
+          ShipmentStatus currentStatus = shipment.getStatus();
+          ShipmentStatus newStatus = dto.getStatus();
+          return (currentStatus == ShipmentStatus.PENDIENTE && newStatus == ShipmentStatus.EN_TRANSITO) ||
+              (currentStatus == ShipmentStatus.EN_TRANSITO && newStatus == ShipmentStatus.ENTREGADO) ||
+              (currentStatus == ShipmentStatus.EN_TRANSITO && newStatus == ShipmentStatus.NOVEDAD);
+        })
+        .orElse(false);
+  }
+
+  public ShipmentDTO updateStatus(Long id, ShipmentStatus status, String observations) {
+    Shipment shipment = shipmentRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Shipment not found"));
+
+    shipment.setStatus(status);
+    if (observations != null && !observations.trim().isEmpty()) {
+      StatusHistory history = new StatusHistory();
+      history.setShipment(shipment);
+      history.setNewStatus(status);
+    }
+
+    return ShipmentMapper.INSTANCE.toDTO(shipmentRepository.save(shipment));
   }
 }

@@ -7,25 +7,28 @@ public class ShipmentDTO {
     private Long id;
     private String trackingCode;
     private ClientDTO client;
-    private PackageDTO packageObj;
     private VehicleDTO vehicle;
     private String originAddress;
     private String destinationAddress;
+    private Double weight;
+    private Double volume;
     private ShipmentPriority priority;
     private ShipmentStatus status;
 
     public ShipmentDTO() {
     }
 
-    public ShipmentDTO(Long id, String trackingCode, ClientDTO client, PackageDTO packageObj, VehicleDTO vehicle,
-            String originAddress, String destinationAddress, ShipmentPriority priority, ShipmentStatus status) {
+    public ShipmentDTO(Long id, String trackingCode, ClientDTO client, VehicleDTO vehicle,
+            String originAddress, String destinationAddress, Double weight, Double volume,
+            ShipmentPriority priority, ShipmentStatus status) {
         this.id = id;
         this.trackingCode = trackingCode;
         this.client = client;
-        this.packageObj = packageObj;
         this.vehicle = vehicle;
         this.originAddress = originAddress;
         this.destinationAddress = destinationAddress;
+        this.weight = weight;
+        this.volume = volume;
         this.priority = priority;
         this.status = status;
     }
@@ -54,14 +57,6 @@ public class ShipmentDTO {
         this.client = client;
     }
 
-    public PackageDTO getPackage() {
-        return packageObj;
-    }
-
-    public void setPackage(PackageDTO packageObj) {
-        this.packageObj = packageObj;
-    }
-
     public VehicleDTO getVehicle() {
         return vehicle;
     }
@@ -84,6 +79,22 @@ public class ShipmentDTO {
 
     public void setDestinationAddress(String destinationAddress) {
         this.destinationAddress = destinationAddress;
+    }
+
+    public Double getWeight() {
+        return weight;
+    }
+
+    public void setWeight(Double weight) {
+        this.weight = weight;
+    }
+
+    public Double getVolume() {
+        return volume;
+    }
+
+    public void setVolume(Double volume) {
+        this.volume = volume;
     }
 
     public ShipmentPriority getPriority() {

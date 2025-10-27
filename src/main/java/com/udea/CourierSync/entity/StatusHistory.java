@@ -42,4 +42,36 @@ public class StatusHistory {
     this.oldStatus = oldStatus;
     this.newStatus = newStatus;
   }
+
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public Shipment getShipment() {
+    return shipment;
+  }
+
+  public void setShipment(Shipment shipment) {
+    this.shipment = shipment;
+  }
+
+  public ShipmentStatus getOldStatus() {
+    return oldStatus;
+  }
+
+  public void setOldStatus(ShipmentStatus oldStatus) {
+    this.oldStatus = oldStatus;
+  }
+
+  public ShipmentStatus getNewStatus() {
+    return newStatus;
+  }
+
+  public void setNewStatus(ShipmentStatus newStatus) {
+    this.newStatus = newStatus;
+  }
 }
