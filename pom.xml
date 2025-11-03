@@ -166,6 +166,14 @@
 						<goals>
 							<goal>report</goal>
 						</goals>
+						<configuration>
+							<!-- generar tambien el reporte XML para Sonar -->
+							<outputDirectory>${project.build.directory}/site/jacoco</outputDirectory>
+							<formats>
+								<format>XML</format>
+								<format>HTML</format>
+							</formats>
+						</configuration>
 					</execution>
 
 					<!-- comprobar umbral mínimo de cobertura -->

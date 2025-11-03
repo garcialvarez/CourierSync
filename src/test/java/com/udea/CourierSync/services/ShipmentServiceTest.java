@@ -1,0 +1,124 @@
+package com.udea.CourierSync.services;
+
+import com.udea.CourierSync.DTO.ClientDTO;
+import com.udea.CourierSync.DTO.ShipmentDTO;
+import com.udea.CourierSync.entity.Client;
+import com.udea.CourierSync.entity.Shipment;
+import com.udea.CourierSync.enums.ShipmentStatus;
+import com.udea.CourierSync.exception.BadRequestException;
+import com.udea.CourierSync.exception.ResourceNotFoundException;
+import com.udea.CourierSync.mapper.ShipmentMapper;
+import com.udea.CourierSync.repository.ClientRepository;
+import com.udea.CourierSync.repository.ShipmentRepository;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class ShipmentServiceTest {
+
+    @Mock
+    private ShipmentRepository shipmentRepository;
+
+    @Mock
+    private ClientRepository clientRepository;
+
+    @Mock
+    private ShipmentMapper shipmentMapper;
+
+    @InjectMocks
+    private ShipmentService shipmentService;
+
+    @Test
+    void createShipment_shouldThrow_whenDtoNull() {
+        assertThrows(BadRequestException.class, () -> shipmentService.createShipment(null));
+    }
+
+    @Test
+    void createShipment_shouldThrow_whenClientIdNull() {
+        ShipmentDTO dto = new ShipmentDTO();
+        dto.setClient(new ClientDTO());
+        assertThrows(BadRequestException.class, () -> shipmentService.createShipment(dto));
+    }
+
+    @Test
+    void createShipment_shouldThrow_whenClientNotFound() {
+        ShipmentDTO dto = new ShipmentDTO();
+        ClientDTO cdto = new ClientDTO();
+        cdto.setId(5L);
+        dto.setClient(cdto);
+
+        Shipment s = new Shipment();
+        when(shipmentMapper.toEntity(dto)).thenReturn(s);
+        when(clientRepository.findById(5L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> shipmentService.createShipment(dto));
+    }
+
+    @Test
+    void createShipment_shouldSaveAndReturnDto_whenHappyPath() {
+        ShipmentDTO dto = new ShipmentDTO();
+        ClientDTO cdto = new ClientDTO();
+        cdto.setId(1L);
+        dto.setClient(cdto);
+
+        Shipment s = new Shipment();
+        s.setClient(new Client());
+        Shipment saved = new Shipment();
+        saved.setTrackingCode("CS1234567");
+
+        when(shipmentMapper.toEntity(dto)).thenReturn(s);
+        when(clientRepository.findById(1L)).thenReturn(Optional.of(new Client()));
+        when(shipmentRepository.save(any(Shipment.class))).thenReturn(saved);
+        when(shipmentMapper.toDTO(saved)).thenReturn(dto);
+
+        ShipmentDTO res = shipmentService.createShipment(dto);
+        assertNotNull(res);
+        verify(shipmentRepository).save(any(Shipment.class));
+    }
+
+    @Test
+    void findByTrackingCode_shouldThrow_whenBlank() {
+        assertThrows(BadRequestException.class, () -> shipmentService.findByTrackingCode("  "));
+    }
+
+    @Test
+    void isShipmentPending_returnsFalse_whenNotFound() {
+        when(shipmentRepository.findById(1L)).thenReturn(Optional.empty());
+        assertFalse(shipmentService.isShipmentPending(1L));
+    }
+
+    @Test
+    void canDriverUpdateStatus_variousTransitions() {
+        Shipment s = new Shipment();
+        s.setStatus(ShipmentStatus.PENDIENTE);
+        when(shipmentRepository.findById(2L)).thenReturn(Optional.of(s));
+
+        ShipmentDTO dto = new ShipmentDTO();
+        dto.setStatus(ShipmentStatus.EN_TRANSITO);
+
+        assertTrue(shipmentService.canDriverUpdateStatus(2L, dto));
+
+        s.setStatus(ShipmentStatus.EN_TRANSITO);
+        dto.setStatus(ShipmentStatus.ENTREGADO);
+        assertTrue(shipmentService.canDriverUpdateStatus(2L, dto));
+
+        dto.setStatus(ShipmentStatus.PENDIENTE);
+        assertFalse(shipmentService.canDriverUpdateStatus(2L, dto));
+    }
+
+    @Test
+    void updateStatus_shouldThrow_whenNotFound() {
+        when(shipmentRepository.findById(9L)).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class, () -> shipmentService.updateStatus(9L, ShipmentStatus.ENTREGADO, null));
+    }
+}
+
