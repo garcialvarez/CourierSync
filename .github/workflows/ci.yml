@@ -7,9 +7,10 @@ on:
     branches: [ main, master ]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
-
+    outputs:
+      tests-result: ${{ steps.test.outcome }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -27,12 +28,32 @@ jobs:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
 
-      - name: Run tests, jacoco and sonar analysis
+      - name: Run tests and generate reports (including JaCoCo)
+        id: test
+        run: |
+          mvn -B clean verify
+
+  sonar-analysis:
+    needs: test
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Run SonarCloud analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: https://sonarcloud.io
         run: |
-          mvn -B clean verify sonar:sonar \
+          mvn -B sonar:sonar \
             -Dsonar.host.url=$SONAR_HOST_URL \
             -Dsonar.login=$SONAR_TOKEN \
             -Dsonar.organization=${{ secrets.SONAR_ORG }} \
