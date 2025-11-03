@@ -116,6 +116,14 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: https://sonarcloud.io
         run: |
+          echo "-- Debug before Sonar run --"
+          echo "PWD: $(pwd)"
+          echo "List root:" && ls -la || true
+          echo "List target:" && ls -la target || true
+          echo "List target/classes:" && ls -la target/classes || true
+          echo "Count .class files:" && find target -type f -name '*.class' | wc -l || true
+          mvn -v || true
+          java -version || true
           if [ -d target/classes ]; then
             echo "Using downloaded classes for Sonar analysis"
             mvn -B -DskipTests=true sonar:sonar \
