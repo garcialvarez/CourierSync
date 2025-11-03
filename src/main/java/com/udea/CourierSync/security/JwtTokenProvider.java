@@ -19,10 +19,10 @@ import java.util.Date;
 public class JwtTokenProvider {
   private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
 
-  @Value("${app.jwt.secret}")
+  @Value("23b73933d4b6588568f142cd423b9c0e")
   private String jwtSecret;
 
-  @Value("${app.jwt.expiration}")
+  @Value("86400000")
   private int jwtExpirationInMs;
 
   private SecretKey key;
